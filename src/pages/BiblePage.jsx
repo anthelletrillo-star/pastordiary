@@ -17,29 +17,91 @@ const BIBLE_BOOKS = [
   '1 Peter', '2 Peter', '1 John', '2 John', '3 John', 'Jude', 'Revelation'
 ];
 
+// NLT API Key - will be set via environment variable once you register at api.nlt.to
+const NLT_API_KEY = import.meta.env.VITE_NLT_API_KEY || '';
+
+// Parse NLT API HTML response into verse objects
+const parseNltHtml = (html) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const verses = [];
+  
+  // NLT API returns HTML with verse numbers in span.vn elements
+  const verseNodes = doc.querySelectorAll('.vn');
+  
+  if (verseNodes.length > 0) {
+    verseNodes.forEach((vn) => {
+      const verseNum = parseInt(vn.textContent.trim(), 10);
+      // Walk siblings collecting text until next verse number
+      let text = '';
+      let node = vn.nextSibling;
+      while (node && !(node.classList && node.classList.contains('vn'))) {
+        text += node.textContent || '';
+        node = node.nextSibling;
+      }
+      if (verseNum && text.trim()) {
+        verses.push({ verse: verseNum, text: text.trim() });
+      }
+    });
+  }
+  
+  // Fallback: if parsing didn't work, return the entire text as one block
+  if (verses.length === 0) {
+    const bodyText = doc.body?.textContent?.trim();
+    if (bodyText) {
+      verses.push({ verse: 1, text: bodyText });
+    }
+  }
+  
+  return verses;
+};
+
 export const BiblePage = () => {
   const [book, setBook] = useState('John');
   const [chapter, setChapter] = useState(3);
-  const [translation, setTranslation] = useState('kjv');
   const [verses, setVerses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedVerse, setSelectedVerse] = useState(null);
+  const [usingNlt, setUsingNlt] = useState(!!NLT_API_KEY);
 
   useEffect(() => {
     const fetchChapter = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`https://bible-api.com/${book} ${chapter}?translation=${translation}`);
-        const data = await response.json();
-        setVerses(data.verses || []);
+        if (NLT_API_KEY) {
+          // Use the official NLT API
+          const ref = `${book} ${chapter}`;
+          const response = await fetch(
+            `https://api.nlt.to/api/passages?ref=${encodeURIComponent(ref)}&version=NLT&key=${NLT_API_KEY}`
+          );
+          const html = await response.text();
+          const parsed = parseNltHtml(html);
+          setVerses(parsed);
+          setUsingNlt(true);
+        } else {
+          // Fallback to bible-api.com (KJV, public domain)
+          const response = await fetch(`https://bible-api.com/${book} ${chapter}?translation=kjv`);
+          const data = await response.json();
+          setVerses(data.verses || []);
+          setUsingNlt(false);
+        }
       } catch (err) {
         console.error("Error fetching Bible data", err);
+        // Fallback to bible-api.com on any error
+        try {
+          const response = await fetch(`https://bible-api.com/${book} ${chapter}?translation=kjv`);
+          const data = await response.json();
+          setVerses(data.verses || []);
+          setUsingNlt(false);
+        } catch (fallbackErr) {
+          console.error("Fallback also failed", fallbackErr);
+        }
       }
       setLoading(false);
     };
     
     fetchChapter();
-  }, [book, chapter, translation]);
+  }, [book, chapter]);
 
   const handleVerseClick = (verse) => {
     setSelectedVerse(verse);
@@ -48,11 +110,9 @@ export const BiblePage = () => {
   return (
     <div className="page-content bible-page">
       <div className="bible-controls">
-        <Select value={translation} onChange={e => setTranslation(e.target.value)}>
-          <option value="kjv">KJV</option>
-          <option value="web">WEB</option>
-          <option value="bbe">BBE</option>
-        </Select>
+        <div className="bible-version-badge">
+          {usingNlt ? 'NLT' : 'KJV'}
+        </div>
         <Select value={book} onChange={e => { setBook(e.target.value); setChapter(1); }}>
           {BIBLE_BOOKS.map(b => <option key={b} value={b}>{b}</option>)}
         </Select>
@@ -65,6 +125,11 @@ export const BiblePage = () => {
 
       <div className="bible-reader">
         <h2 className="bible-chapter-title">{book} {chapter}</h2>
+        {!usingNlt && (
+          <div className="nlt-notice">
+            📖 Showing KJV (public domain). To use NLT, add your API key from <a href="https://api.nlt.to/" target="_blank" rel="noopener">api.nlt.to</a>
+          </div>
+        )}
         {loading ? (
           <div className="bible-loading">Loading scripture...</div>
         ) : (

@@ -1,6 +1,8 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Book, Mic, Calendar as CalendarIcon, Menu, User, Search, ArrowLeft } from 'lucide-react';
+import { BrowserRouter, Routes, Route, NavLink, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { Home, Book, Mic, Calendar as CalendarIcon, Menu, User, Search, ArrowLeft, LogOut } from 'lucide-react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { LoginPage } from './pages/LoginPage';
 import { HomePage } from './pages/HomePage';
 import { BiblePage } from './pages/BiblePage';
 import { SermonsPage } from './pages/SermonsPage';
@@ -10,19 +12,74 @@ import { AppointmentEditorPage } from './pages/AppointmentEditorPage';
 import { NotificationManager } from './components/NotificationManager';
 import { NotificationBanner } from './components/NotificationBanner';
 
-const MorePage = () => <div className="page-content">More options coming soon...</div>;
+const MorePage = () => {
+  const { signOut, user } = useAuth();
+  
+  return (
+    <div className="page-content" style={{padding: '24px 16px'}}>
+      <div className="card" style={{marginBottom: '16px'}}>
+        <div className="card-title">Account</div>
+        <div className="card-subtitle">{user?.email || 'Pastor'}</div>
+      </div>
+      <button 
+        onClick={signOut}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          width: '100%',
+          padding: '14px 16px',
+          background: 'rgba(239, 68, 68, 0.08)',
+          border: '1px solid rgba(239, 68, 68, 0.2)',
+          borderRadius: '12px',
+          color: '#ef4444',
+          fontSize: '1rem',
+          fontWeight: '500',
+          cursor: 'pointer',
+        }}
+      >
+        <LogOut size={20} /> Sign Out
+      </button>
+    </div>
+  );
+};
+
+// Protected Route wrapper
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        color: 'var(--text-secondary)',
+        fontSize: '0.875rem'
+      }}>
+        Loading...
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
 
 const TopBar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Determine title based on path
   let title = "Shepherd's Library";
   let leftIcon = <Menu size={24} />;
   let rightIcon = <User size={24} />;
   
   if (location.pathname === '/bible') {
-    title = "Bible";
+    title = "Bible (NLT)";
     leftIcon = <ArrowLeft size={24} onClick={() => navigate(-1)} />;
     rightIcon = <Search size={24} />;
   } else if (location.pathname.startsWith('/sermons/')) {
@@ -35,6 +92,10 @@ const TopBar = () => {
   } else if (location.pathname === '/calendar') {
     title = "Schedule";
     rightIcon = <Search size={24} />;
+  } else if (location.pathname.startsWith('/calendar/appointment')) {
+    title = "Appointment";
+    leftIcon = <ArrowLeft size={24} onClick={() => navigate(-1)} />;
+    rightIcon = null;
   }
 
   return (
@@ -116,37 +177,52 @@ const Sidebar = ({ badgeCount }) => {
   );
 };
 
-function App() {
+function AppShell() {
   const [badgeCount, setBadgeCount] = React.useState(0);
   const [activeNotification, setActiveNotification] = React.useState(null);
 
   return (
-    <BrowserRouter>
-      <div className="app-container">
-        <NotificationManager 
-          onNotification={setActiveNotification}
-          onBadgeUpdate={setBadgeCount}
-        />
-        <NotificationBanner 
-          appointment={activeNotification}
-          onDismiss={() => setActiveNotification(null)}
-        />
-        <Sidebar badgeCount={badgeCount} />
-        <div className="main-content-wrapper">
-          <TopBar />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/bible" element={<BiblePage />} />
-            <Route path="/sermons" element={<SermonsPage />} />
-            <Route path="/sermons/:id" element={<SermonEditorPage />} />
-            <Route path="/calendar" element={<CalendarPage />} />
-            <Route path="/calendar/appointment/:id" element={<AppointmentEditorPage />} />
-            <Route path="/more" element={<MorePage />} />
-          </Routes>
-          <BottomNav badgeCount={badgeCount} />
-        </div>
+    <div className="app-container">
+      <NotificationManager 
+        onNotification={setActiveNotification}
+        onBadgeUpdate={setBadgeCount}
+      />
+      <NotificationBanner 
+        appointment={activeNotification}
+        onDismiss={() => setActiveNotification(null)}
+      />
+      <Sidebar badgeCount={badgeCount} />
+      <div className="main-content-wrapper">
+        <TopBar />
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/bible" element={<BiblePage />} />
+          <Route path="/sermons" element={<SermonsPage />} />
+          <Route path="/sermons/:id" element={<SermonEditorPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/calendar/appointment/:id" element={<AppointmentEditorPage />} />
+          <Route path="/more" element={<MorePage />} />
+        </Routes>
+        <BottomNav badgeCount={badgeCount} />
       </div>
-    </BrowserRouter>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <AppShell />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
