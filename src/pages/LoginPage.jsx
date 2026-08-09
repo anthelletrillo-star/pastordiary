@@ -4,21 +4,33 @@ import { BookOpen, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import './LoginPage.css';
 
 export const LoginPage = () => {
-  const { signIn } = useAuth();
+  const { signIn, signUp } = useAuth();
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
     setLoading(true);
     try {
-      await signIn(email, password);
+      if (isSignUp) {
+        const res = await signUp(email, password);
+        if (res?.user && !res?.session) {
+          setMessage('Account created! Check your email to confirm, or try logging in.');
+        } else {
+          setMessage('Account created successfully!');
+        }
+      } else {
+        await signIn(email, password);
+      }
     } catch (err) {
-      setError(err.message || 'Invalid email or password');
+      setError(err.message || 'Authentication failed');
     }
     setLoading(false);
   };
@@ -35,9 +47,32 @@ export const LoginPage = () => {
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
+          <div className="auth-mode-toggle" style={{ display: 'flex', marginBottom: '20px', borderRadius: '10px', background: '#09090b', padding: '4px', border: '1px solid #27272a' }}>
+            <button
+              type="button"
+              onClick={() => { setIsSignUp(false); setError(''); setMessage(''); }}
+              style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: !isSignUp ? '#27272a' : 'transparent', color: !isSignUp ? '#ffffff' : '#a1a1aa', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => { setIsSignUp(true); setError(''); setMessage(''); }}
+              style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: isSignUp ? '#27272a' : 'transparent', color: isSignUp ? '#ffffff' : '#a1a1aa', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              Sign Up
+            </button>
+          </div>
+
           {error && (
             <div className="login-error">
               {error}
+            </div>
+          )}
+
+          {message && (
+            <div className="login-error" style={{ background: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)', color: '#4ade80' }}>
+              {message}
             </div>
           )}
 
@@ -83,7 +118,7 @@ export const LoginPage = () => {
             className="login-button"
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? (isSignUp ? 'Creating Account...' : 'Signing in...') : (isSignUp ? 'Create Account' : 'Sign In')}
           </button>
         </form>
 
