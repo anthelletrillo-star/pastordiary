@@ -47,18 +47,18 @@ export const LoginPage = () => {
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
-          <div className="auth-mode-toggle" style={{ display: 'flex', marginBottom: '20px', borderRadius: '10px', background: '#09090b', padding: '4px', border: '1px solid #27272a' }}>
+          <div className="auth-mode-toggle" style={{ display: 'flex', marginBottom: '24px', borderRadius: '12px', background: '#000000', padding: '6px', border: '1px solid #333333' }}>
             <button
               type="button"
               onClick={() => { setIsSignUp(false); setError(''); setMessage(''); }}
-              style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: !isSignUp ? '#27272a' : 'transparent', color: !isSignUp ? '#ffffff' : '#a1a1aa', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+              style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: !isSignUp ? '#ffffff' : 'transparent', color: !isSignUp ? '#000000' : '#ffffff', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', transition: 'all 0.2s' }}
             >
               Sign In
             </button>
             <button
               type="button"
               onClick={() => { setIsSignUp(true); setError(''); setMessage(''); }}
-              style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: isSignUp ? '#27272a' : 'transparent', color: isSignUp ? '#ffffff' : '#a1a1aa', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}
+              style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: isSignUp ? '#ffffff' : 'transparent', color: isSignUp ? '#000000' : '#ffffff', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', transition: 'all 0.2s' }}
             >
               Sign Up
             </button>
@@ -120,6 +120,16 @@ export const LoginPage = () => {
           >
             {loading ? (isSignUp ? 'Creating Account...' : 'Signing in...') : (isSignUp ? 'Create Account' : 'Sign In')}
           </button>
+
+          <div style={{ textAlign: 'center', marginTop: '16px' }}>
+            <button
+              type="button"
+              onClick={() => { setIsSignUp(!isSignUp); setError(''); setMessage(''); }}
+              style={{ background: 'none', border: 'none', color: '#a1a1aa', fontSize: '0.875rem', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+            </button>
+          </div>
         </form>
 
         <p className="login-footer">
