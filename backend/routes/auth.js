@@ -73,7 +73,7 @@ router.post('/send-otp', async (req, res) => {
 
 // Verify OTP and sign in
 router.post('/verify-otp', async (req, res) => {
-  const { email, otp } = req.body;
+  const { email, otp, password } = req.body;
   if (!email || !otp) return res.status(400).json({ error: 'Email and OTP are required' });
 
   const stored = otpStore.get(email.toLowerCase());
@@ -103,8 +103,6 @@ router.post('/verify-otp', async (req, res) => {
   // OTP is valid! Clean up
   otpStore.delete(email.toLowerCase());
 
-  // Sign in or create the user with Supabase Admin
-  // We use a service role key to manage users
   try {
     // Check if user exists in Supabase
     const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers();
@@ -115,18 +113,21 @@ router.post('/verify-otp', async (req, res) => {
     }
 
     if (!user) {
-      // Create the user with a random password (they use OTP, not passwords)
-      const randomPassword = require('crypto').randomBytes(32).toString('hex');
+      // Create user in Supabase with the password provided during sign up (or generate a random one if not provided)
+      const userPassword = password || require('crypto').randomBytes(32).toString('hex');
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email: email.toLowerCase(),
-        password: randomPassword,
+        password: userPassword,
         email_confirm: true
       });
       if (createError) {
         console.error('Failed to create user:', createError);
-        return res.status(500).json({ error: 'Failed to create account' });
+        return res.status(500).json({ error: createError.message || 'Failed to create account' });
       }
       user = newUser.user;
+    } else if (password) {
+      // If user exists and password was supplied, update their password
+      await supabase.auth.admin.updateUserById(user.id, { password, email_confirm: true });
     }
 
     // Generate a session for the user
