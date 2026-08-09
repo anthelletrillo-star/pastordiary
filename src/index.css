@@ -1,0 +1,295 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Color Palette */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --accent-primary: #3b82f6;
+  --accent-hover: #2563eb;
+  --border-color: #e2e8f0;
+  --error-color: #ef4444;
+  --success-color: #22c55e;
+  
+  /* Typography */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Layout */
+  --nav-height: calc(64px + env(safe-area-inset-bottom));
+  --topbar-height: calc(56px + env(safe-area-inset-top));
+  --max-content-width: 600px;
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding-bottom: var(--nav-height);
+  padding-top: var(--topbar-height);
+  min-height: 100vh;
+}
+
+#root {
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+  background-color: var(--bg-secondary);
+  min-height: 100vh;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+/* Base Elements */
+a {
+  text-decoration: none;
+  color: var(--accent-primary);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Reusable UI Components */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 1000;
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  padding: 8px 0;
+  flex: 1;
+  transition: color var(--transition-fast);
+}
+
+.bottom-nav-item.active {
+  color: var(--accent-primary);
+}
+
+.bottom-nav-item svg {
+  margin-bottom: 4px;
+}
+
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--topbar-height);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 1000;
+  padding-top: env(safe-area-inset-top);
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+}
+
+.top-bar h1 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.page-content {
+  padding: 16px;
+}
+
+.nav-badge {
+  background-color: var(--error-color, #ef4444);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  padding: 0 4px;
+  border: 2px solid var(--bg-primary);
+}
+
+/* Card Component */
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+/* App Container Layout */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content-wrapper {
+  flex: 1;
+  position: relative;
+  width: 100%;
+}
+
+.desktop-sidebar {
+  display: none;
+}
+
+/* 
+ * PROGRESSIVE ENHANCEMENTS for Desktop 
+ * Mobile first -> Desktop layout adjustments
+ */
+@media (min-width: 768px) {
+  :root {
+    --nav-height: 0px; /* Remove bottom padding for nav */
+  }
+
+  body {
+    background-color: var(--bg-primary); /* slightly off white background on desktop */
+  }
+
+  #root {
+    max-width: 100%; /* Take full width to accommodate sidebar */
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  /* Desktop Sidebar Layout */
+  .desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 280px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding-top: var(--topbar-height);
+  }
+
+  .sidebar-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sidebar-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 0;
+    flex: 1;
+  }
+
+  .sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 24px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+  }
+
+  .sidebar-nav-item svg {
+    margin-right: 16px;
+  }
+
+  .sidebar-nav-item:hover, .sidebar-nav-item.active {
+    background-color: rgba(59, 130, 246, 0.05);
+    color: var(--accent-primary);
+  }
+
+  .sidebar-nav-item.active {
+    border-right: 3px solid var(--accent-primary);
+  }
+
+  /* Hide mobile elements */
+  .bottom-nav {
+    display: none;
+  }
+
+  .top-bar {
+    width: calc(100% - 280px);
+    left: 280px; /* Offset for sidebar */
+    margin: 0;
+    max-width: none;
+  }
+
+  .main-content-wrapper {
+    max-width: var(--max-content-width);
+    margin: 0 auto;
+    background-color: var(--bg-secondary);
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.03); /* Subtle shadow for the main column */
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+  }
+}
+
+@media (min-width: 1024px) {
+  .main-content-wrapper {
+    max-width: 800px;
+  }
+}

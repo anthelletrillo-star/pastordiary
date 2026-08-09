@@ -1,0 +1,21 @@
+.appointment-editor {
+  padding-bottom: 80px;
+}
+
+.date-time-row {
+  display: flex;
+  gap: 16px;
+}
+
+.date-time-row > * {
+  flex: 1;
+}
+
+.custom-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.editor-actions {
+  margin-top: 32px;
+}

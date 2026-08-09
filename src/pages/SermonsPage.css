@@ -1,0 +1,64 @@
+.sermons-page {
+  padding-bottom: 32px;
+}
+
+.sermons-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.sermons-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.sermon-list-card {
+  margin-bottom: 16px;
+  transition: transform var(--transition-fast);
+}
+
+.sermon-list-card:active {
+  transform: scale(0.98);
+}
+
+.sermon-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sermon-list-date {
+  font-size: 0.875rem;
+  color: var(--accent-primary);
+  font-weight: 500;
+}
+
+.sermon-list-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.sermon-list-passage,
+.sermon-list-series {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.sermon-list-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.sermon-list-status {
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 500;
+}

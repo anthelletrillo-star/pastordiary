@@ -1,0 +1,104 @@
+.home-page {
+  padding: 24px 16px;
+}
+
+.home-header {
+  margin-bottom: 32px;
+}
+
+.greeting {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  margin-bottom: 0; /* Override generic card */
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.action-card:active {
+  transform: scale(0.98);
+}
+
+.action-icon-wrap {
+  width: 48px;
+  height: 48px;
+  background-color: rgba(59, 130, 246, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+}
+
+.action-text {
+  flex: 1;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.sermon-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sermon-date {
+  font-size: 0.875rem;
+  color: var(--accent-primary);
+  font-weight: 500;
+}
+
+.sermon-status {
+  font-size: 0.75rem;
+  background-color: var(--bg-primary);
+  padding: 2px 8px;
+  border-radius: 12px;
+  color: var(--text-secondary);
+}
+
+.sermon-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.sermon-passage {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 20px;
+}
+
+.sermon-action {
+  display: flex;
+  align-items: center;
+  color: var(--accent-primary);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.sermon-action svg {
+  margin-left: 4px;
+}

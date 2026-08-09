@@ -1,0 +1,114 @@
+.bible-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--topbar-height) - var(--nav-height));
+  padding: 0; /* Remove default padding for full edge-to-edge text if wanted, but let's keep some */
+}
+
+.bible-controls {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.bible-controls .input-group {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.bible-controls select {
+  min-height: 40px;
+  padding: 0 8px;
+  font-size: 0.875rem;
+}
+
+.bible-reader {
+  flex: 1;
+  padding: 24px 20px;
+  overflow-y: auto;
+  font-family: 'Georgia', serif; /* Better for reading scripture */
+  background: var(--bg-secondary);
+}
+
+.bible-chapter-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+}
+
+.bible-text {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #334155;
+}
+
+.verse-span {
+  cursor: pointer;
+  padding: 2px 0;
+  border-radius: 4px;
+  transition: background-color var(--transition-fast);
+}
+
+.verse-span:active {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.verse-num {
+  font-size: 0.75em;
+  color: var(--accent-primary);
+  font-weight: 600;
+  margin-right: 4px;
+  margin-left: 8px;
+}
+
+.bible-loading {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px;
+}
+
+.bible-nav-buttons {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+}
+
+.bible-nav-buttons button {
+  flex: 1;
+}
+
+/* Verse Actions Bottom Sheet styling */
+.verse-preview {
+  font-style: italic;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.action-item {
+  justify-content: flex-start;
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+.action-item svg {
+  margin-right: 16px;
+  color: var(--text-secondary);
+}

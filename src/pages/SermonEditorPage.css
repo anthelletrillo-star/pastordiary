@@ -1,0 +1,82 @@
+.sermon-editor {
+  padding-bottom: 32px;
+}
+
+.editor-container {
+  margin-bottom: 24px;
+}
+
+/* ReactQuill mobile overrides */
+.ql-toolbar.ql-snow {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  border-color: var(--border-color);
+  background-color: var(--bg-primary);
+  display: flex;
+  overflow-x: auto; /* horizontally scrollable toolbar */
+  white-space: nowrap;
+  padding: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ql-toolbar.ql-snow::-webkit-scrollbar {
+  display: none;
+}
+
+.ql-container.ql-snow {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  border-color: var(--border-color);
+  background-color: var(--bg-secondary);
+  font-family: var(--font-family);
+  font-size: 1rem;
+  min-height: 250px;
+}
+
+.ql-editor {
+  min-height: 250px;
+}
+
+.attachment-section {
+  margin-bottom: 32px;
+  padding: 16px;
+  background-color: var(--bg-primary);
+  border-radius: 12px;
+  border: 1px dashed var(--border-color);
+}
+
+.attachment-hint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 8px;
+}
+
+.upload-progress-container {
+  margin-top: 16px;
+}
+
+.upload-text {
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--accent-primary);
+  transition: width 0.3s ease;
+}
+
+.editor-actions {
+  position: sticky;
+  bottom: calc(16px + var(--nav-height));
+  z-index: 10;
+}
