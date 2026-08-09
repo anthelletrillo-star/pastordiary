@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Color Palette */
+  /* Color Palette - Monochrome (Black & White) */
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
-  --accent-primary: #3b82f6;
-  --accent-hover: #2563eb;
-  --border-color: #e2e8f0;
+  --text-primary: #000000;
+  --text-secondary: #555555;
+  --accent-primary: #000000;
+  --accent-hover: #333333;
+  --border-color: #e5e5e5;
   --error-color: #ef4444;
   --success-color: #22c55e;
   

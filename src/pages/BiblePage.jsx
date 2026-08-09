@@ -63,6 +63,27 @@ export const BiblePage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedVerse, setSelectedVerse] = useState(null);
   const [usingNlt, setUsingNlt] = useState(!!NLT_API_KEY);
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+
+  // Scroll detection to hide controls when scrolling down (Full Screen)
+  useEffect(() => {
+    let lastScrollY = 0;
+    const readerEl = document.querySelector('.bible-reader');
+    if (!readerEl) return;
+
+    const handleScroll = () => {
+      const currentScrollY = readerEl.scrollTop;
+      if (currentScrollY > lastScrollY && currentScrollY > 60) {
+        setIsHeaderHidden(true); // Scrolling down -> Full Screen
+      } else if (currentScrollY < lastScrollY) {
+        setIsHeaderHidden(false); // Scrolling up -> Show controls
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    readerEl.addEventListener('scroll', handleScroll, { passive: true });
+    return () => readerEl.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const fetchChapter = async () => {
@@ -108,8 +129,8 @@ export const BiblePage = () => {
   };
 
   return (
-    <div className="page-content bible-page">
-      <div className="bible-controls">
+    <div className={`page-content bible-page ${isHeaderHidden ? 'header-hidden' : ''}`}>
+      <div className={`bible-controls ${isHeaderHidden ? 'hidden' : ''}`}>
         <div className="bible-version-badge">
           {usingNlt ? 'NLT' : 'KJV'}
         </div>

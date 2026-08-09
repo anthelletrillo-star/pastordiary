@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+
 import { Button } from '../components/Button';
 import { Input, Select } from '../components/Input';
 import { Save, Paperclip, Trash2 } from 'lucide-react';
@@ -118,13 +117,15 @@ export const SermonEditorPage = () => {
       </Select>
 
       <div className="editor-container">
-        <label className="input-label">Sermon Content</label>
-        <ReactQuill 
-          theme="snow" 
+        <label className="input-label" htmlFor="sermon-content">Sermon Content</label>
+        <textarea 
+          id="sermon-content"
+          className="custom-input custom-textarea" 
           value={content} 
-          onChange={setContent} 
-          modules={modules}
+          onChange={e => setContent(e.target.value)} 
           placeholder="Start writing your sermon here..."
+          rows={12}
+          style={{ width: '100%', minHeight: '200px', resize: 'vertical', fontFamily: 'inherit', fontSize: '1rem', lineHeight: '1.6' }}
         />
       </div>
 

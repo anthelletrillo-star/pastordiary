@@ -9,11 +9,13 @@ import { SermonsPage } from './pages/SermonsPage';
 import { SermonEditorPage } from './pages/SermonEditorPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { AppointmentEditorPage } from './pages/AppointmentEditorPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { NotificationManager } from './components/NotificationManager';
 import { NotificationBanner } from './components/NotificationBanner';
 
 const MorePage = () => {
   const { signOut, user } = useAuth();
+  const navigate = useNavigate();
   
   return (
     <div className="page-content" style={{padding: '24px 16px'}}>
@@ -21,6 +23,28 @@ const MorePage = () => {
         <div className="card-title">Account</div>
         <div className="card-subtitle">{user?.email || 'Pastor'}</div>
       </div>
+
+      <button 
+        onClick={() => navigate('/admin')}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          width: '100%',
+          padding: '14px 16px',
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '12px',
+          color: 'var(--text-primary)',
+          fontSize: '1rem',
+          fontWeight: '500',
+          cursor: 'pointer',
+          marginBottom: '12px'
+        }}
+      >
+        <User size={20} /> Admin Dashboard
+      </button>
+
       <button 
         onClick={signOut}
         style={{
@@ -201,6 +225,7 @@ function AppShell() {
           <Route path="/sermons/:id" element={<SermonEditorPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/calendar/appointment/:id" element={<AppointmentEditorPage />} />
+          <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/more" element={<MorePage />} />
         </Routes>
         <BottomNav badgeCount={badgeCount} />
