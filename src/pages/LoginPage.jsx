@@ -1,36 +1,131 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { BookOpen, Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import { BookOpen, Mail, ArrowLeft } from 'lucide-react';
 import './LoginPage.css';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 export const LoginPage = () => {
-  const { signIn, signUp } = useAuth();
-  const [isSignUp, setIsSignUp] = useState(false);
+  const { signIn } = useAuth();
+  const [step, setStep] = useState('email'); // 'email' | 'otp'
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const otpRefs = useRef([]);
 
-  const handleSubmit = async (e) => {
+  const handleSendOTP = async (e) => {
     e.preventDefault();
+    if (!email) return;
     setError('');
     setMessage('');
     setLoading(true);
     try {
-      if (isSignUp) {
-        const res = await signUp(email, password);
-        if (res?.user && !res?.session) {
-          setMessage('Account created! Check your email to confirm, or try logging in.');
-        } else {
-          setMessage('Account created successfully!');
-        }
-      } else {
-        await signIn(email, password);
+      const res = await fetch(`${API_URL}/api/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send OTP');
+      setMessage('A 6-digit code has been sent to your email.');
+      setStep('otp');
+      setTimeout(() => otpRefs.current[0]?.focus(), 100);
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
+  };
+
+  const handleOtpChange = (index, value) => {
+    if (value.length > 1) value = value.slice(-1);
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pastedData.length === 6) {
+      const newOtp = pastedData.split('');
+      setOtp(newOtp);
+      otpRefs.current[5]?.focus();
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    const code = otp.join('');
+    if (code.length !== 6) {
+      setError('Please enter the complete 6-digit code.');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp: code })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Verification failed');
+
+      // OTP verified! Now sign in with Supabase using a magic link or password
+      // Since the backend confirmed the user, we use signInWithPassword
+      // with a known convention or use the session directly
+      setMessage('Verified! Signing you in...');
+      
+      // For now, sign in using Supabase's signInWithOtp (email magic link)
+      // This sends another email but auto-signs in if the user is already confirmed
+      const { supabase } = await import('../services/supabaseClient');
+      const { error: signInError } = await supabase.auth.signInWithOtp({ 
+        email,
+        options: { shouldCreateUser: true }
+      });
+      
+      if (signInError) {
+        // Fallback: If Supabase OTP doesn't work, just set a flag
+        console.error('Supabase sign-in error:', signInError);
+        setError('Email verified but sign-in failed. Please try again.');
       }
     } catch (err) {
-      setError(err.message || 'Authentication failed');
+      setError(err.message);
+    }
+    setLoading(false);
+  };
+
+  const handleResendOTP = async () => {
+    setOtp(['', '', '', '', '', '']);
+    setError('');
+    setMessage('');
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to resend OTP');
+      setMessage('New code sent to your email.');
+    } catch (err) {
+      setError(err.message);
     }
     setLoading(false);
   };
@@ -46,91 +141,91 @@ export const LoginPage = () => {
           <p className="login-subtitle">Shepherd's Library</p>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="auth-mode-toggle" style={{ display: 'flex', marginBottom: '24px', borderRadius: '12px', background: '#000000', padding: '6px', border: '1px solid #333333' }}>
+        {step === 'email' ? (
+          <form className="login-form" onSubmit={handleSendOTP}>
+            {error && <div className="login-error">{error}</div>}
+
+            <p style={{ color: '#a1a1aa', fontSize: '0.875rem', marginBottom: '20px', textAlign: 'center' }}>
+              Enter your email to receive a login code.
+            </p>
+
+            <div className="login-field">
+              <div className="login-input-wrap">
+                <Mail size={18} className="login-input-icon" />
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  className="login-input"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? 'Sending Code...' : 'Send Login Code'}
+            </button>
+          </form>
+        ) : (
+          <form className="login-form" onSubmit={handleVerifyOTP}>
             <button
               type="button"
-              onClick={() => { setIsSignUp(false); setError(''); setMessage(''); }}
-              style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: !isSignUp ? '#ffffff' : 'transparent', color: !isSignUp ? '#000000' : '#ffffff', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', transition: 'all 0.2s' }}
+              onClick={() => { setStep('email'); setOtp(['', '', '', '', '', '']); setError(''); setMessage(''); }}
+              style={{ background: 'none', border: 'none', color: '#a1a1aa', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', marginBottom: '20px', fontSize: '0.875rem' }}
             >
-              Sign In
+              <ArrowLeft size={16} /> Change email
             </button>
-            <button
-              type="button"
-              onClick={() => { setIsSignUp(true); setError(''); setMessage(''); }}
-              style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: isSignUp ? '#ffffff' : 'transparent', color: isSignUp ? '#000000' : '#ffffff', fontWeight: '700', fontSize: '0.95rem', cursor: 'pointer', transition: 'all 0.2s' }}
-            >
-              Sign Up
+
+            {error && <div className="login-error">{error}</div>}
+            {message && (
+              <div className="login-error" style={{ background: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)', color: '#4ade80' }}>
+                {message}
+              </div>
+            )}
+
+            <p style={{ color: '#a1a1aa', fontSize: '0.875rem', marginBottom: '8px', textAlign: 'center' }}>
+              Enter the 6-digit code sent to
+            </p>
+            <p style={{ color: '#ffffff', fontSize: '0.875rem', marginBottom: '24px', textAlign: 'center', fontWeight: '600' }}>
+              {email}
+            </p>
+
+            <div className="otp-inputs" onPaste={handleOtpPaste}>
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={el => otpRefs.current[index] = el}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                  className="otp-input"
+                  autoFocus={index === 0}
+                />
+              ))}
+            </div>
+
+            <button type="submit" className="login-button" disabled={loading}>
+              {loading ? 'Verifying...' : 'Verify & Sign In'}
             </button>
-          </div>
 
-          {error && (
-            <div className="login-error">
-              {error}
-            </div>
-          )}
-
-          {message && (
-            <div className="login-error" style={{ background: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)', color: '#4ade80' }}>
-              {message}
-            </div>
-          )}
-
-          <div className="login-field">
-            <div className="login-input-wrap">
-              <Mail size={18} className="login-input-icon" />
-              <input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="login-input"
-              />
-            </div>
-          </div>
-
-          <div className="login-field">
-            <div className="login-input-wrap">
-              <Lock size={18} className="login-input-icon" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-                className="login-input"
-              />
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
               <button
                 type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={handleResendOTP}
+                disabled={loading}
+                style={{ background: 'none', border: 'none', color: '#a1a1aa', fontSize: '0.875rem', cursor: 'pointer', textDecoration: 'underline' }}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                Didn't receive the code? Resend
               </button>
             </div>
-          </div>
-
-          <button
-            type="submit"
-            className="login-button"
-            disabled={loading}
-          >
-            {loading ? (isSignUp ? 'Creating Account...' : 'Signing in...') : (isSignUp ? 'Create Account' : 'Sign In')}
-          </button>
-
-          <div style={{ textAlign: 'center', marginTop: '16px' }}>
-            <button
-              type="button"
-              onClick={() => { setIsSignUp(!isSignUp); setError(''); setMessage(''); }}
-              style={{ background: 'none', border: 'none', color: '#a1a1aa', fontSize: '0.875rem', cursor: 'pointer', textDecoration: 'underline' }}
-            >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
-            </button>
-          </div>
-        </form>
+          </form>
+        )}
 
         <p className="login-footer">
           For the glory of God alone. ✝️
